@@ -1,6 +1,6 @@
 # Checklist Nghiệm Thu Sau Sửa Chữa
 
-Ứng dụng web tĩnh (chạy được như **Telegram Mini App** hoặc mở trực tiếp trên trình duyệt điện thoại) để lập & xuất ảnh phiếu nghiệm thu trụ sạc / tủ đổi pin.
+Ứng dụng web tĩnh, mở trực tiếp trên trình duyệt điện thoại để lập & xuất ảnh phiếu nghiệm thu trụ sạc / tủ đổi pin.
 
 ## Cấu trúc
 
@@ -31,12 +31,10 @@ git remote add origin https://github.com/<user>/<repo>.git
 git push -u origin main
 ```
 
-Sau đó vào **Settings → Pages → Build and deployment**, chọn `Deploy from a branch` → branch `main` / thư mục `/ (root)`. Link sẽ có dạng `https://<user>.github.io/<repo>/`.
-
-> Dùng làm Telegram Mini App: lấy link `https://...` ở trên dán vào BotFather (Web App URL). Cần **HTTPS** để chức năng chia sẻ/lưu ảnh hoạt động — GitHub Pages đã có sẵn HTTPS.
+Sau đó vào **Settings → Pages → Build and deployment**, chọn `Deploy from a branch` → branch `main` / thư mục `/ (root)`. Link sẽ có dạng `https://<user>.github.io/<repo>/`. Cần **HTTPS** để chức năng chia sẻ/lưu ảnh hoạt động — GitHub Pages đã có sẵn HTTPS.
 
 ## Lưu ảnh trên điện thoại
 
-- Bấm **📤 Lưu / Chia sẻ ảnh** → mở bảng chia sẻ của hệ điều hành (có sẵn *Lưu ảnh / Save to Files* hoặc gửi thẳng vào chat Telegram).
-- Hoặc **nhấn giữ vào ảnh** xem trước → chọn *Lưu ảnh*.
-- Nếu đang trong trình duyệt thu gọn của Telegram mà không lưu được, bấm **🌐 Mở bằng trình duyệt** rồi xuất lại.
+- **Android (trình duyệt):** bấm **Tải về** → ảnh tải thẳng thành file.
+- **iPhone:** bấm **Tải về** → mở bảng chia sẻ → chọn *Lưu ảnh*; hoặc **nhấn giữ vào ảnh** xem trước → *Lưu ảnh*.
+- **Trong app (Zalo…):** **nhấn giữ vào ảnh** → *Lưu ảnh*; hoặc mở menu **⋮ → Mở trong trình duyệt** rồi bấm Tải về để lưu thành file.

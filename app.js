@@ -2,12 +2,6 @@
 const ACCESS_CODE = "ktv2026";   // mã truy cập chung. Để "" nếu KHÔNG cần mã.
 const LOGO_URL    = "";          // logo công ty: dán data-URL ("data:image/png;base64,....") hoặc link https. Để "" nếu chưa có.
 
-/* ====== Telegram Mini App (TÙY CHỌN) ======
-   Script telegram-web-app.js được tải ASYNC để KHÔNG chặn hiển thị trang
-   (trên Zalo/mạng VN, telegram.org có thể chậm → trước đây gây lag lúc mở).
-   Vì vậy không lấy đối tượng TG ngay lúc này mà đọc lười qua hàm tg(). */
-function tg(){ return (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null; }
-
 /* logo on login */
 if(LOGO_URL){ const lg=document.getElementById('lg-logo'); lg.src=LOGO_URL; lg.style.display='inline-block'; }
 
@@ -80,7 +74,7 @@ function initSig(key){
   };
 }
 /* app.js nằm cuối <body> + CSS đã nạp (link trong <head>) nên DOM & layout đã sẵn:
-   khởi tạo chữ ký NGAY, không chờ window 'load' (tránh bị treo nếu Telegram tải chậm). */
+   khởi tạo chữ ký NGAY, không chờ window 'load'. */
 initSig('ktv'); initSig('gs');
 /* canvas đổi kích thước khi xoay ngang/dọc → khởi tạo lại để ký không lệch nét */
 window.addEventListener('orientationchange',()=>{ setTimeout(()=>{ initSig('ktv'); initSig('gs'); },300); });
@@ -107,24 +101,6 @@ function logout(){ localStorage.removeItem('ck_auth');
   document.getElementById('login').style.display='flex';
   document.getElementById('lg-code').value=''; }
 
-/* Khởi tạo Telegram khi script đã sẵn sàng (tải async) – không chặn giao diện.
-   Thử ngay; nếu chưa có thì thử lại lúc 'load' (lúc đó script async đã nạp xong). */
-function initTelegram(){
-  const t=tg(); if(!t) return;
-  try{ t.ready(); t.expand();
-    if(t.setHeaderColor) t.setHeaderColor('#0b5fa5');
-    if(t.disableVerticalSwipes) t.disableVerticalSwipes(); }catch(e){}
-  try{ if(t.initDataUnsafe && t.initDataUnsafe.user){
-    const u=t.initDataUnsafe.user;
-    const nm=[u.last_name,u.first_name].filter(Boolean).join(' ').trim();
-    if(nm && !localStorage.getItem('ck_name')){
-      localStorage.setItem('ck_name',nm);
-      const f=document.getElementById('lg-name'); if(f && !f.value) f.value=nm;
-    }
-  } }catch(e){}
-}
-initTelegram();
-if(!tg()) window.addEventListener('load', initTelegram);
 /* auto-resume on same device */
 (function(){ if(localStorage.getItem('ck_auth')==='1'){
   const n=localStorage.getItem('ck_name')||''; document.getElementById('lg-name').value=n; showApp(n);
@@ -222,8 +198,20 @@ function isMobile(){
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent)
     || (navigator.maxTouchPoints>1 && /Macintosh/.test(navigator.userAgent)); /* iPad iPadOS */
 }
+function isIOS(){
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    || (navigator.maxTouchPoints>1 && /Macintosh/.test(navigator.userAgent)); /* iPad iPadOS */
+}
 function canShareFiles(file){
   try{ return !!(navigator.canShare && navigator.canShare({files:[file]})); }catch(e){ return false; }
+}
+/* Mở bảng chia sẻ để "Lưu ảnh". Trả về true nếu đã mở được (kể cả khi user huỷ). */
+async function shareFile(){
+  if(!genBlob || !navigator.share) return false;
+  const file=new File([genBlob], genName, {type:genType});
+  if(!canShareFiles(file)) return false;
+  try{ await navigator.share({files:[file], title:genName}); return true; }
+  catch(e){ return !!(e && e.name==='AbortError'); /* user huỷ → coi như đã xử lý */ }
 }
 /* đánh dấu thiết bị di động để CSS hiện gợi ý "nhấn giữ ảnh" */
 if(isMobile()) document.documentElement.classList.add('is-mobile');
@@ -246,23 +234,38 @@ function showSaveHint(){
   if(el){ el.style.display='block'; try{ el.scrollIntoView({block:'nearest'}); }catch(_){} }
 }
 
-/* Nút "Tải về": PC tải thẳng; điện thoại mở share sheet để "Lưu ảnh" về thư viện.
-   Lưu ý: iOS Safari & WebView trong app CHẶN <a download> → phải share sheet hoặc nhấn-giữ ảnh. */
+/* Nút "Tải về" – xử lý theo từng nền tảng vì khả năng tải mỗi nơi mỗi khác:
+   - PC / Android (trình duyệt thật): <a download> tải thẳng được → KHÔNG bật chia sẻ.
+   - iOS Safari: CHẶN <a download> → chỉ có share sheet ("Lưu ảnh") hoặc nhấn-giữ ảnh.
+   - Webview trong app (Zalo, Messenger…): CHẶN <a download> và thường không có Web Share
+     → cách chắc ăn duy nhất là nhấn-giữ ảnh → hiện hướng dẫn rõ ràng. */
 async function downloadGenerated(){
   if(!genBlob){ return; }
-  if(isMobile()){
-    const file=new File([genBlob], genName, {type:genType});
-    if(navigator.share && canShareFiles(file)){
-      try{ await navigator.share({files:[file], title:genName}); return; }
-      catch(e){ if(e && e.name==='AbortError') return; }
-    }
-    // Không có Web Share (Zalo/Safari cũ) → thử tải; nếu vẫn không thì mở ảnh ra tab mới để nhấn-giữ lưu
-    if(tryDownload()){ showSaveHint(); return; }
-    try{ if(genUrl) window.open(genUrl,'_blank'); }catch(e){}
+
+  /* PC / laptop: tải thẳng */
+  if(!isMobile()){
+    if(!tryDownload()) showSaveHint();
+    return;
+  }
+
+  /* Trình duyệt trong app (Zalo…): thử chia sẻ nếu bản mới hỗ trợ, không thì hướng dẫn nhấn-giữ */
+  if(isInApp()){
+    if(await shareFile()) return;
     showSaveHint();
     return;
   }
-  if(!tryDownload()) showSaveHint();
+
+  /* Android trình duyệt thật: ưu tiên tải thẳng (không bật share sheet cho đỡ giống "chia sẻ") */
+  if(!isIOS()){
+    if(tryDownload()) return;
+    if(await shareFile()) return;
+    showSaveHint();
+    return;
+  }
+
+  /* iOS Safari: không tải thẳng được → share sheet ("Lưu ảnh"), không thì nhấn-giữ ảnh */
+  if(await shareFile()) return;
+  showSaveHint();
 }
 function closeResult(){ document.getElementById('result').style.display='none'; }
 
