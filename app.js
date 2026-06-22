@@ -2,10 +2,11 @@
 const ACCESS_CODE = "ktv2026";   // mã truy cập chung. Để "" nếu KHÔNG cần mã.
 const LOGO_URL    = "";          // logo công ty: dán data-URL ("data:image/png;base64,....") hoặc link https. Để "" nếu chưa có.
 
-/* ====== Telegram Mini App init ====== */
-const TG = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
-if(TG){ try{ TG.ready(); TG.expand(); if(TG.setHeaderColor) TG.setHeaderColor('#0b5fa5');
-  if(TG.disableVerticalSwipes) TG.disableVerticalSwipes(); }catch(e){} }
+/* ====== Telegram Mini App (TÙY CHỌN) ======
+   Script telegram-web-app.js được tải ASYNC để KHÔNG chặn hiển thị trang
+   (trên Zalo/mạng VN, telegram.org có thể chậm → trước đây gây lag lúc mở).
+   Vì vậy không lấy đối tượng TG ngay lúc này mà đọc lười qua hàm tg(). */
+function tg(){ return (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null; }
 
 /* logo on login */
 if(LOGO_URL){ const lg=document.getElementById('lg-logo'); lg.src=LOGO_URL; lg.style.display='inline-block'; }
@@ -78,7 +79,11 @@ function initSig(key){
     data(){return dirty?c.toDataURL('image/png'):'';}
   };
 }
-window.addEventListener('load',()=>{initSig('ktv');initSig('gs');});
+/* app.js nằm cuối <body> + CSS đã nạp (link trong <head>) nên DOM & layout đã sẵn:
+   khởi tạo chữ ký NGAY, không chờ window 'load' (tránh bị treo nếu Telegram tải chậm). */
+initSig('ktv'); initSig('gs');
+/* canvas đổi kích thước khi xoay ngang/dọc → khởi tạo lại để ký không lệch nét */
+window.addEventListener('orientationchange',()=>{ setTimeout(()=>{ initSig('ktv'); initSig('gs'); },300); });
 function clearSig(key){ if(sigs[key]) sigs[key].clear(); }
 
 /* ===== LOGIN ===== */
@@ -102,14 +107,24 @@ function logout(){ localStorage.removeItem('ck_auth');
   document.getElementById('login').style.display='flex';
   document.getElementById('lg-code').value=''; }
 
-/* prefill name from Telegram user if available */
-(function(){
-  if(TG && TG.initDataUnsafe && TG.initDataUnsafe.user){
-    const u=TG.initDataUnsafe.user;
+/* Khởi tạo Telegram khi script đã sẵn sàng (tải async) – không chặn giao diện.
+   Thử ngay; nếu chưa có thì thử lại lúc 'load' (lúc đó script async đã nạp xong). */
+function initTelegram(){
+  const t=tg(); if(!t) return;
+  try{ t.ready(); t.expand();
+    if(t.setHeaderColor) t.setHeaderColor('#0b5fa5');
+    if(t.disableVerticalSwipes) t.disableVerticalSwipes(); }catch(e){}
+  try{ if(t.initDataUnsafe && t.initDataUnsafe.user){
+    const u=t.initDataUnsafe.user;
     const nm=[u.last_name,u.first_name].filter(Boolean).join(' ').trim();
-    if(nm && !localStorage.getItem('ck_name')) localStorage.setItem('ck_name',nm);
-  }
-})();
+    if(nm && !localStorage.getItem('ck_name')){
+      localStorage.setItem('ck_name',nm);
+      const f=document.getElementById('lg-name'); if(f && !f.value) f.value=nm;
+    }
+  } }catch(e){}
+}
+initTelegram();
+if(!tg()) window.addEventListener('load', initTelegram);
 /* auto-resume on same device */
 (function(){ if(localStorage.getItem('ck_auth')==='1'){
   const n=localStorage.getItem('ck_name')||''; document.getElementById('lg-name').value=n; showApp(n);
@@ -168,20 +183,39 @@ function fileName(ext){
 }
 
 /* ===== GENERATE IMAGE + RESULT OVERLAY ===== */
-let genBlob=null, genName='', genType='image/png';
+let genBlob=null, genName='', genType='image/png', genUrl='';
+
+/* Trình duyệt nhúng trong app (Zalo, Messenger, Instagram, Line...) thường yếu →
+   giảm scale để bớt treo khi xuất ảnh. Trình duyệt thường vẫn dùng scale 2 cho nét. */
+function isInApp(){ return /Zalo|FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger/i.test(navigator.userAgent); }
+const EXPORT_SCALE = isInApp() ? 1.5 : 2;
+
+function showLoading(on){
+  const el=document.getElementById('loading'); if(el) el.style.display=on?'flex':'none';
+}
+
 async function makeImage(type){
+  if(typeof html2canvas==='undefined'){ alert('Thư viện tạo ảnh đang tải, vui lòng thử lại sau giây lát.'); return; }
+  showLoading(true);
   try{
     renderExport();
+    // nhường 1 nhịp để spinner kịp vẽ trước khi html2canvas chiếm CPU
+    await new Promise(r=>setTimeout(r,40));
     const canvas=await html2canvas(document.getElementById('sheet'),
-      {scale:2,backgroundColor:'#ffffff',width:780,windowWidth:780,useCORS:true});
+      {scale:EXPORT_SCALE,backgroundColor:'#ffffff',width:780,windowWidth:780,useCORS:true});
     genType = type==='png'?'image/png':'image/jpeg';
     genName = fileName(type==='png'?'png':'jpg');
-    const dataUrl=canvas.toDataURL(genType, type==='png'?1:0.92);
-    document.getElementById('rimg').src=dataUrl;
-    await new Promise(res=>canvas.toBlob(b=>{genBlob=b;res();}, genType, type==='png'?1:0.92));
+    /* CHỈ mã hoá MỘT lần bằng toBlob, rồi dùng object URL cho ảnh xem trước.
+       (Trước đây gọi cả toDataURL + toBlob = mã hoá 2 lần → nặng, treo trên Zalo.) */
+    genBlob = await new Promise(res=>canvas.toBlob(b=>res(b), genType, type==='png'?1:0.92));
+    if(!genBlob){ alert('Không tạo được ảnh trên trình duyệt này. Hãy thử “Mở bằng trình duyệt”.'); return; }
+    if(genUrl){ URL.revokeObjectURL(genUrl); }
+    genUrl = URL.createObjectURL(genBlob);
+    document.getElementById('rimg').src=genUrl;
     document.getElementById('result').style.display='flex';
     window.scrollTo(0,0);
   }catch(err){ alert('Không tạo được ảnh: '+err); }
+  finally{ showLoading(false); }
 }
 /* ===== device helpers ===== */
 function isMobile(){
@@ -212,20 +246,8 @@ function showSaveHint(){
   if(el){ el.style.display='block'; try{ el.scrollIntoView({block:'nearest'}); }catch(_){} }
 }
 
-/* Nút "Lưu / Chia sẻ": ưu tiên share sheet của hệ điều hành (đã có sẵn "Lưu ảnh"/"Save to Files") */
-async function shareGenerated(){
-  if(!genBlob){ return; }
-  const file=new File([genBlob], genName, {type:genType});
-  if(navigator.share && canShareFiles(file)){
-    try{ await navigator.share({files:[file], title:'Checklist nghiệm thu', text:genName}); return; }
-    catch(e){ if(e && e.name==='AbortError') return; /* người dùng huỷ */ }
-  }
-  // Không share được → thử tải; nếu vẫn không được (vd WebView Telegram) thì hướng dẫn nhấn giữ ảnh
-  if(tryDownload()) return;
-  showSaveHint();
-}
-
-/* Nút "Tải về": PC tải thẳng; điện thoại mở share sheet để "Lưu ảnh" về thư viện */
+/* Nút "Tải về": PC tải thẳng; điện thoại mở share sheet để "Lưu ảnh" về thư viện.
+   Lưu ý: iOS Safari & WebView trong app CHẶN <a download> → phải share sheet hoặc nhấn-giữ ảnh. */
 async function downloadGenerated(){
   if(!genBlob){ return; }
   if(isMobile()){
@@ -234,15 +256,13 @@ async function downloadGenerated(){
       try{ await navigator.share({files:[file], title:genName}); return; }
       catch(e){ if(e && e.name==='AbortError') return; }
     }
-    if(!tryDownload()) showSaveHint();
+    // Không có Web Share (Zalo/Safari cũ) → thử tải; nếu vẫn không thì mở ảnh ra tab mới để nhấn-giữ lưu
+    if(tryDownload()){ showSaveHint(); return; }
+    try{ if(genUrl) window.open(genUrl,'_blank'); }catch(e){}
+    showSaveHint();
     return;
   }
   if(!tryDownload()) showSaveHint();
-}
-function openInBrowser(){
-  const u=location.href.split('#')[0];
-  try{ if(TG && TG.openLink){ TG.openLink(u); return; } }catch(e){}
-  window.open(u,'_blank');
 }
 function closeResult(){ document.getElementById('result').style.display='none'; }
 

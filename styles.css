@@ -89,7 +89,11 @@
   .actions button{flex:1;padding:14px 6px;border:none;border-radius:10px;font-size:16px;
     font-weight:700;cursor:pointer;color:#fff}
   .b-go{background:var(--accent)}
-  .b-clear{background:#fff;color:var(--bad);border:1.5px solid #e6b7b1;flex:0 0 auto;padding:14px 16px}
+  /* nút X (xoá form): ô vuông nền đỏ nhạt, icon đỏ – dùng .actions .b-clear để chắc chắn đè .actions button */
+  .actions .b-clear{flex:0 0 auto;width:54px;padding:0;border:none;border-radius:10px;
+    background:var(--badbg);color:var(--bad);font-size:22px;line-height:1;font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+  .actions .b-clear:active{background:#f6cfc9}
 
   /* ===================== RESULT OVERLAY ===================== */
   #result{position:fixed;inset:0;z-index:80;background:rgba(15,23,35,.78);
@@ -104,6 +108,15 @@
   .r-share{background:var(--accent);color:#fff}
   .r-dl{background:#0a7d33;color:#fff}
   .r-close{background:#eef1f5;color:#333}
+
+  /* ===================== LOADING (lúc tạo ảnh) ===================== */
+  #loading{position:fixed;inset:0;z-index:90;background:rgba(15,23,35,.55);
+    display:none;align-items:center;justify-content:center}
+  .ld-box{background:#fff;border-radius:14px;padding:22px 28px;text-align:center;
+    color:var(--head);font-weight:700;font-size:14px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+  .ld-spin{width:34px;height:34px;border:3.5px solid #d8e6f5;border-top-color:var(--accent);
+    border-radius:50%;margin:0 auto 12px;animation:ldspin .8s linear infinite}
+  @keyframes ldspin{to{transform:rotate(360deg)}}
 
   /* ===================== HIDDEN EXPORT SHEET (official look) ===================== */
   #exportHost{position:fixed;left:-10000px;top:0;z-index:-1}
@@ -153,7 +166,7 @@
     .actions{gap:8px;
       padding:7px calc(10px + env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left))}
     .actions button{padding:10px 6px;font-size:15px;line-height:1.2}
-    .b-clear{padding:10px 15px}
+    .actions .b-clear{width:48px;padding:0;font-size:20px}
     .rbtns button{min-width:calc(50% - 4px)}
   }
   @media (max-width:360px){
