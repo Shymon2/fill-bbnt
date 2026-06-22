@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b5fa5">
+<title>Checklist Nghiệm Thu Sau Sửa Chữa</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ===== LOGIN ===== -->
+  <div id="login">
+    <div class="login-card">
+      <img class="logo" id="lg-logo" alt="" style="display:none">
+      <h2>NGHIỆM THU SAU SỬA CHỮA</h2>
+      <p>Trụ sạc &amp; Tủ đổi pin — đăng nhập để bắt đầu</p>
+      <input id="lg-name" placeholder="Họ tên KTV" autocomplete="name">
+      <input id="lg-code" placeholder="Mã truy cập" type="password" autocomplete="off">
+      <button onclick="doLogin()">Vào hệ thống</button>
+      <div class="login-err" id="lg-err"></div>
+    </div>
+  </div>
+
+  <!-- ===== TOPBAR ===== -->
+  <div class="topbar">
+    <div class="title">Checklist nghiệm thu</div>
+    <div class="who"><span id="who-name"></span></div>
+    <button class="linkbtn" onclick="logout()">Đổi KTV</button>
+  </div>
+
+  <!-- ===== FORM ===== -->
+  <div class="app">
+    <div class="sec">I. THÔNG TIN</div>
+    <div class="row2">
+      <div class="field"><label>Mã trụ / trạm</label><input id="f_ma_tru"></div>
+      <div class="field"><label>Mã sự vụ</label><input id="f_ma_su_vu"></div>
+    </div>
+    <div class="field"><label>Địa điểm</label><input id="f_dia_diem"></div>
+    <div class="row2">
+      <div class="field"><label>Ngày sửa chữa</label><input id="f_ngay" type="date"></div>
+      <div class="field"><label>NCC / ĐTUQ</label><input id="f_ncc"></div>
+    </div>
+    <div class="field"><label>KTV thực hiện</label><input id="f_ktv"></div>
+    <div class="field"><label>Hình thức sửa chữa</label>
+      <div class="chips" id="chips-hinhthuc">
+        <span class="chip"><input type="radio" name="hinhthuc" id="ht1" value="Có thay linh kiện"><label for="ht1">Có thay linh kiện</label></span>
+        <span class="chip"><input type="radio" name="hinhthuc" id="ht2" value="Không thay"><label for="ht2">Không thay</label></span>
+        <span class="chip"><input type="radio" name="hinhthuc" id="ht3" value="Không sửa chữa"><label for="ht3">Không sửa chữa</label></span>
+      </div>
+    </div>
+
+    <div class="sec">II. KIỂM TRA KỸ THUẬT – NGHIỆM THU</div>
+    <div id="items"></div>
+
+    <div class="field"><label>Mô tả khác</label><textarea id="f_mota"></textarea></div>
+
+    <div class="sec">III. KẾT LUẬN &amp; XÁC NHẬN</div>
+    <div class="field"><label>Kết luận nghiệm thu</label>
+      <div class="chips">
+        <span class="chip"><input type="radio" name="ketluan" id="kl1" value="dat"><label for="kl1">✔ Đạt</label></span>
+        <span class="chip"><input type="radio" name="ketluan" id="kl2" value="khong"><label for="kl2">✘ Không đạt</label></span>
+      </div>
+    </div>
+    <div class="field"><label>Lý do (nếu không đạt)</label><input id="f_lydo"></div>
+    <div class="row2">
+      <div class="field"><label>KTV sửa chữa</label><input id="f_ktv_ky"></div>
+      <div class="field"><label>Giám sát / nghiệm thu (nếu có)</label><input id="f_gs"></div>
+    </div>
+    <div class="field"><label>Chữ ký KTV sửa chữa</label>
+      <div class="sigwrap">
+        <canvas id="sig_ktv" class="sigpad"></canvas>
+        <span class="sighint" id="hint_ktv">Ký bằng ngón tay tại đây</span>
+        <button class="sigclear" onclick="clearSig('ktv')">Xóa</button>
+      </div>
+    </div>
+    <div class="field"><label>Chữ ký giám sát (nếu có)</label>
+      <div class="sigwrap">
+        <canvas id="sig_gs" class="sigpad"></canvas>
+        <span class="sighint" id="hint_gs">Ký bằng ngón tay tại đây</span>
+        <button class="sigclear" onclick="clearSig('gs')">Xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ACTION BAR ===== -->
+  <div class="actions">
+    <button class="b-go" onclick="makeImage('png')">📤 Xuất &amp; chia sẻ ảnh</button>
+    <button class="b-clear" onclick="clearAll()">✖</button>
+  </div>
+
+  <!-- ===== RESULT OVERLAY ===== -->
+  <div id="result">
+    <div class="rcard">
+      <div class="rhint">Ảnh đã sẵn sàng. Bấm <b>Lưu / Chia sẻ ảnh</b> để gửi vào chat Telegram hoặc lưu về máy.</div>
+      <img id="rimg" alt="Checklist">
+      <div class="rhint mobile-only" id="rhint-save">📲 Trên điện thoại: <b>nhấn giữ vào ảnh</b> ở trên rồi chọn <b>Lưu ảnh / Tải ảnh</b> để tải về máy. Nếu vẫn không được, bấm <b>🌐 Mở bằng trình duyệt</b> rồi xuất lại.</div>
+      <div class="rbtns">
+        <button class="r-share" onclick="shareGenerated()">📤 Lưu / Chia sẻ ảnh</button>
+        <button class="r-dl" onclick="downloadGenerated()">⬇ Tải về</button>
+        <button class="r-close" onclick="openInBrowser()">🌐 Mở bằng trình duyệt</button>
+        <button class="r-close" onclick="closeResult()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HIDDEN EXPORT SHEET ===== -->
+  <div id="exportHost"><div id="sheet"></div></div>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="html2canvas.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

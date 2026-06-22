@@ -1,0 +1,161 @@
+  :root{
+    --ink:#1a2230; --muted:#5a6677; --line:#d8dee7; --head:#0b5fa5; --headbg:#e8f1fb;
+    --ok:#0a7d33; --okbg:#e7f6ec; --bad:#c0392b; --badbg:#fdecea; --accent:#0b5fa5;
+    --bg:#eef1f5; --card:#ffffff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI",Roboto,system-ui,Arial,sans-serif;font-size:15px;line-height:1.45;
+    -webkit-text-size-adjust:100%;}
+
+  /* ===================== LOGIN ===================== */
+  #login{position:fixed;inset:0;z-index:100;background:linear-gradient(160deg,#0b5fa5,#0a3d6b);
+    display:flex;align-items:center;justify-content:center;padding:20px}
+  .login-card{background:#fff;border-radius:16px;padding:26px 22px;width:100%;max-width:360px;
+    box-shadow:0 18px 50px rgba(0,0,0,.3);text-align:center}
+  .login-card img.logo{max-height:54px;margin-bottom:8px}
+  .login-card h2{margin:4px 0 2px;color:var(--head);font-size:20px}
+  .login-card p{margin:0 0 18px;color:var(--muted);font-size:13px}
+  .login-card input{width:100%;padding:13px 14px;margin:7px 0;border:1.5px solid var(--line);
+    border-radius:10px;font-size:16px;outline:none}
+  .login-card input:focus{border-color:var(--accent)}
+  .login-card button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;
+    background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+  .login-err{color:var(--bad);font-size:13px;min-height:18px;margin-top:6px}
+
+  /* ===================== TOPBAR ===================== */
+  .topbar{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid #dbe2ea;
+    display:flex;align-items:center;gap:8px;box-shadow:0 1px 5px rgba(0,0,0,.06);
+    padding:calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 8px calc(12px + env(safe-area-inset-left))}
+  .topbar .title{font-weight:700;color:var(--head);font-size:15px;flex:1;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .who{font-size:12px;color:var(--muted)}
+  .linkbtn{background:none;border:none;color:var(--accent);font-size:12px;cursor:pointer;
+    text-decoration:underline;padding:2px 4px}
+
+  /* ===================== INPUT FORM ===================== */
+  .app{max-width:none;width:100%;margin:0 auto;padding:12px 6px calc(120px + env(safe-area-inset-bottom))}
+  .sec{font-weight:700;color:var(--head);font-size:15px;margin:18px 4px 8px;
+    border-bottom:2px solid var(--head);padding-bottom:4px}
+  .field{margin:9px 0}
+  .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:3px;font-weight:600}
+  .field input,.field textarea{width:100%;padding:11px 12px;border:1.5px solid var(--line);
+    border-radius:10px;font-size:16px;font-family:inherit;outline:none;background:#fff}
+  .field input:focus,.field textarea:focus{border-color:var(--accent)}
+  .field textarea{min-height:80px;resize:vertical}
+  .row2{display:flex;gap:10px}.row2>*{flex:1;min-width:0}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{flex:1 1 auto;min-width:120px}
+  /* input ẩn: ép kích thước 1px để KHÔNG dính .field input{width:100%} gây tràn ngang */
+  .chip input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;padding:0;margin:0;border:0}
+  .chip label{display:block;text-align:center;padding:11px 10px;border:1.5px solid var(--line);
+    border-radius:10px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;background:#fff}
+  .chip input:checked+label{background:var(--headbg);border-color:var(--accent);color:var(--head)}
+
+  /* item cards */
+  .item{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:12px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .item .head{display:flex;gap:8px;align-items:baseline;margin-bottom:2px}
+  .item .num{background:var(--headbg);color:var(--head);font-weight:700;border-radius:7px;
+    padding:2px 9px;font-size:13px;flex:none}
+  .item .cat{font-weight:700;font-size:14px}
+  .item .desc{color:#2c3645;font-size:14px;margin:4px 0 10px}
+  .pills{display:flex;gap:10px}
+  .pill{flex:1;position:relative}
+  .pill input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;padding:0;margin:0;border:0}
+  .pill label{display:flex;align-items:center;justify-content:center;gap:7px;min-height:48px;
+    border:1.6px solid var(--line);border-radius:10px;font-weight:700;font-size:15px;
+    color:var(--muted);cursor:pointer;background:#fff}
+  .pill .dot{width:18px;height:18px;border:1.6px solid currentColor;border-radius:50%;display:inline-block}
+  .pill.ok input:checked+label{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+  .pill.bad input:checked+label{background:var(--badbg);border-color:var(--bad);color:var(--bad)}
+  .pill input:checked+label .dot{background:currentColor;box-shadow:inset 0 0 0 3px #fff}
+
+  /* signature pad */
+  .sigwrap{position:relative}
+  .sigpad{width:100%;height:130px;border:1.6px dashed #9fb0c4;border-radius:10px;background:#fff;
+    touch-action:none;display:block}
+  .sigclear{position:absolute;top:8px;right:10px;font-size:12px;background:#fff;
+    border:1px solid var(--line);border-radius:7px;padding:4px 9px;color:var(--muted);cursor:pointer}
+  .sighint{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;
+    color:#b6c0cc;font-size:13px;pointer-events:none}
+
+  /* ===================== ACTION BAR ===================== */
+  .actions{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;
+    border-top:1px solid #dbe2ea;display:flex;gap:8px;box-shadow:0 -2px 10px rgba(0,0,0,.07);
+    padding:10px calc(12px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left))}
+  .actions button{flex:1;padding:14px 6px;border:none;border-radius:10px;font-size:16px;
+    font-weight:700;cursor:pointer;color:#fff}
+  .b-go{background:var(--accent)}
+  .b-clear{background:#fff;color:var(--bad);border:1.5px solid #e6b7b1;flex:0 0 auto;padding:14px 16px}
+
+  /* ===================== RESULT OVERLAY ===================== */
+  #result{position:fixed;inset:0;z-index:80;background:rgba(15,23,35,.78);
+    display:none;align-items:flex-start;justify-content:center;padding:16px;overflow:auto}
+  .rcard{background:#fff;border-radius:14px;padding:14px;max-width:560px;width:100%;margin:auto;text-align:center}
+  .rhint{font-size:13px;color:var(--muted);margin-bottom:10px}
+  .rhint b{color:var(--head)}
+  #rimg{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block}
+  .rbtns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .rbtns button{flex:1;min-width:120px;padding:13px 8px;border:none;border-radius:10px;
+    font-size:15px;font-weight:700;cursor:pointer}
+  .r-share{background:var(--accent);color:#fff}
+  .r-dl{background:#0a7d33;color:#fff}
+  .r-close{background:#eef1f5;color:#333}
+
+  /* ===================== HIDDEN EXPORT SHEET (official look) ===================== */
+  #exportHost{position:fixed;left:-10000px;top:0;z-index:-1}
+  #sheet{width:780px;background:#fff;padding:26px 30px 28px;font-size:14px;color:#1a1a1a;position:relative}
+  #sheet .elogo{position:absolute;left:30px;top:22px;max-height:50px}
+  #sheet h1{font-size:19px;text-align:center;margin:0;color:var(--head);letter-spacing:.3px}
+  #sheet .ssub{text-align:center;font-style:italic;color:#444;margin:2px 0 14px;font-size:13px}
+  #sheet .esec{font-weight:700;color:var(--head);margin:15px 0 7px;font-size:15px;
+    border-bottom:2px solid var(--head);padding-bottom:3px}
+  #sheet .eline{margin:6px 0;display:flex;flex-wrap:wrap;gap:3px 18px;align-items:center}
+  #sheet .eline b{font-weight:400}
+  #sheet .val{border-bottom:1px dotted #555;min-width:90px;padding:0 5px;font-weight:600}
+  #sheet .sig{height:46px;vertical-align:middle}
+  #sheet .ebox{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;
+    border:1.6px solid #444;border-radius:3px;margin-right:5px;vertical-align:middle;
+    font-weight:900;color:var(--accent);font-size:13px;line-height:1}
+  #sheet table{border-collapse:collapse;width:100%;margin-top:3px}
+  #sheet th,#sheet td{border:1px solid #777;padding:6px 8px;vertical-align:middle}
+  #sheet thead th{background:var(--headbg);color:var(--head);font-size:13px;text-align:center}
+  #sheet td.stt{text-align:center;width:32px;font-weight:600}
+  #sheet td.main{width:150px;font-weight:600}
+  #sheet td.res{text-align:center;width:62px}
+  #sheet .rh{display:block;font-size:11px;font-weight:600;margin-bottom:3px}
+  #sheet .rh.k{color:var(--ok)} #sheet .rh.x{color:var(--bad)}
+  #sheet .enote{border:1px solid #bbb;border-radius:6px;padding:8px;min-height:54px;
+    white-space:pre-wrap;margin-top:3px}
+  #sheet .efoot{margin-top:16px;font-size:12px;color:#555;border-top:1px dashed #bbb;padding-top:8px}
+
+  /* ===================== MOBILE / SAVE-IMAGE ===================== */
+  /* gợi ý "nhấn giữ ảnh để lưu" – chỉ hiện trên điện thoại (html.is-mobile) */
+  .mobile-only{display:none}
+  html.is-mobile .mobile-only{display:block}
+  #rhint-save{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--headbg);
+    color:var(--head);font-size:13px;line-height:1.5;text-align:left}
+  #rhint-save b{color:var(--bad)}
+  /* ảnh kết quả: cho phép nhấn-giữ để lưu, không bị thao tác chạm chặn */
+  #rimg{-webkit-touch-callout:default;touch-action:manipulation;user-select:none}
+
+  /* màn hình nhỏ: gọn lại cho dễ thao tác bằng ngón tay */
+  @media (max-width:430px){
+    body{font-size:14px}
+    /* chừa chỗ vừa đủ cho thanh nút đã thu gọn – bớt khoảng trống thừa, đỡ phải scroll */
+    .app{padding:10px 6px calc(70px + env(safe-area-inset-bottom))}
+    .row2{flex-wrap:wrap}
+    .chip{min-width:calc(50% - 4px)}
+    /* thanh nút dưới gọn lại: thấp hơn, chiếm ít chiều cao màn hình hơn */
+    .actions{gap:8px;
+      padding:7px calc(10px + env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left))}
+    .actions button{padding:10px 6px;font-size:15px;line-height:1.2}
+    .b-clear{padding:10px 15px}
+    .rbtns button{min-width:calc(50% - 4px)}
+  }
+  @media (max-width:360px){
+    .chip{min-width:100%}
+  }
