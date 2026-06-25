@@ -120,30 +120,41 @@
 
   /* ===================== HIDDEN EXPORT SHEET (official look) ===================== */
   #exportHost{position:fixed;left:-10000px;top:0;z-index:-1}
-  #sheet{width:780px;background:#fff;padding:26px 30px 28px;font-size:14px;color:#1a1a1a;position:relative}
-  #sheet .elogo{position:absolute;left:30px;top:22px;max-height:50px}
-  #sheet h1{font-size:19px;text-align:center;margin:0;color:var(--head);letter-spacing:.3px}
-  #sheet .ssub{text-align:center;font-style:italic;color:#444;margin:2px 0 14px;font-size:13px}
-  #sheet .esec{font-weight:700;color:var(--head);margin:15px 0 7px;font-size:15px;
-    border-bottom:2px solid var(--head);padding-bottom:3px}
-  #sheet .eline{margin:6px 0;display:flex;flex-wrap:wrap;gap:3px 18px;align-items:center}
-  #sheet .eline b{font-weight:400}
-  #sheet .val{border-bottom:1px dotted #555;min-width:90px;padding:0 5px;font-weight:600}
-  #sheet .sig{height:46px;vertical-align:middle}
-  #sheet .ebox{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;
-    border:1.6px solid #444;border-radius:3px;margin-right:5px;vertical-align:middle;
-    font-weight:900;color:var(--accent);font-size:13px;line-height:1}
-  #sheet table{border-collapse:collapse;width:100%;margin-top:3px}
-  #sheet th,#sheet td{border:1px solid #777;padding:6px 8px;vertical-align:middle}
-  #sheet thead th{background:var(--headbg);color:var(--head);font-size:13px;text-align:center}
-  #sheet td.stt{text-align:center;width:32px;font-weight:600}
-  #sheet td.main{width:150px;font-weight:600}
-  #sheet td.res{text-align:center;width:62px}
-  #sheet .rh{display:block;font-size:11px;font-weight:600;margin-bottom:3px}
-  #sheet .rh.k{color:var(--ok)} #sheet .rh.x{color:var(--bad)}
-  #sheet .enote{border:1px solid #bbb;border-radius:6px;padding:8px;min-height:54px;
-    white-space:pre-wrap;margin-top:3px}
-  #sheet .efoot{margin-top:16px;font-size:12px;color:#555;border-top:1px dashed #bbb;padding-top:8px}
+  #sheet{width:780px;background:#fff;padding:24px 30px 28px;font-size:14px;color:#1a1a1a;position:relative}
+  /* header: logo trái – ô CONFIDENTIAL phải */
+  #sheet .ehead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+  #sheet .elogo{height:50px;width:auto;display:block}
+  #sheet .econf-img{height:30px;width:auto;display:block;margin-top:6px}
+  #sheet .econf{border:1.5px solid var(--bad);color:var(--bad);font-weight:700;font-size:12px;
+    letter-spacing:.5px;padding:3px 12px;border-radius:2px}
+  #sheet h1{font-size:20px;text-align:center;margin:0;color:#111;letter-spacing:.3px;font-weight:800}
+  #sheet .ssub{text-align:center;font-style:italic;color:#333;margin:2px 0 12px;font-size:13px}
+  #sheet .esec{font-weight:700;color:#111;margin:13px 0 6px;font-size:15px}
+  /* mục I & III: gạch đầu dòng */
+  #sheet .einfo{list-style:disc;margin:6px 0;padding-left:26px}
+  #sheet .einfo li{margin:5px 0;line-height:1.7}
+  #sheet .einfo li.sub{list-style:none;margin-left:4px}
+  #sheet b{font-weight:400}
+  #sheet .val{border-bottom:1px solid #333;min-width:120px;padding:0 6px;font-weight:600;
+    display:inline-block;margin:0 4px}
+  #sheet .val.wide{min-width:300px}
+  #sheet .sig{height:40px;vertical-align:middle}
+  #sheet .ebox{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;
+    border:1.4px solid #222;margin-right:4px;vertical-align:middle;
+    font-weight:900;color:#111;font-size:11px;line-height:1}
+  /* bảng II */
+  #sheet table{border-collapse:collapse;width:100%;margin-top:4px}
+  #sheet th,#sheet td{border:1px solid #333;padding:5px 7px;vertical-align:middle}
+  #sheet thead th{background:#fff;color:#111;font-size:13px;text-align:center;font-weight:700}
+  #sheet th.hstt{width:34px} #sheet th.hres{width:58px}
+  #sheet td.stt{text-align:center;font-weight:600}
+  #sheet td.main{width:150px;font-weight:400}
+  #sheet td.res{text-align:center}
+  #sheet td.res .rl{font-size:11px;color:#333;margin-top:2px}
+  /* mô tả khác: dòng kẻ */
+  #sheet .elabel{margin:12px 0 2px}
+  #sheet .emota{min-height:60px;white-space:pre-wrap;line-height:24px;
+    background:repeating-linear-gradient(to bottom,transparent 0,transparent 23px,#999 23px,#999 24px)}
 
   /* ===================== MOBILE / SAVE-IMAGE ===================== */
   /* gợi ý "nhấn giữ ảnh để lưu" – chỉ hiện trên điện thoại (html.is-mobile) */

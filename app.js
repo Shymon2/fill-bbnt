@@ -1,9 +1,13 @@
 /* ====== CONFIG ====== */
-const ACCESS_CODE = "ktv2026";   // mã truy cập chung. Để "" nếu KHÔNG cần mã.
-const LOGO_URL    = "";          // logo công ty: dán data-URL ("data:image/png;base64,....") hoặc link https. Để "" nếu chưa có.
+const ACCESS_CODE = "ktv2026";          // mã truy cập chung. Để "" nếu KHÔNG cần mã.
+const LOGO_URL    = "logo/v-logo.png";  // logo công ty (góc trái header). Để "" nếu chưa có.
+const CONF_URL    = "logo/sign.png";    // con dấu CONFIDENTIAL (góc phải header). Để "" nếu không dùng.
 
 /* logo on login */
 if(LOGO_URL){ const lg=document.getElementById('lg-logo'); lg.src=LOGO_URL; lg.style.display='inline-block'; }
+
+/* preload logo header để html2canvas chụp đủ ảnh (không bị thiếu logo lúc xuất) */
+[LOGO_URL,CONF_URL].forEach(u=>{ if(u){ const i=new Image(); i.src=u; } });
 
 const ROWS = [
   ["1","Thay linh kiện (Nếu có)","Đúng chủng loại, lắp đúng vị trí, cấu hình đúng yêu cầu.","Đạt","Chưa đạt"],
@@ -112,7 +116,7 @@ function val(id){return (document.getElementById(id).value||'').trim();}
 function radio(name){const x=document.querySelector(`input[name="${name}"]:checked`);return x?x.value:'';}
 function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function cb(on){return `<span class="ebox">${on?'✓':''}</span>`;}
-function vline(t){return `<span class="val">${esc(t)||'&nbsp;'}</span>`;}
+function vline(t,extra){return `<span class="val${extra?' '+extra:''}">${esc(t)||'&nbsp;'}</span>`;}
 function kyCell(key){ const d=sigs[key]&&sigs[key].data(); return d?`<img class="sig" src="${d}">`:vline(''); }
 
 function renderExport(){
@@ -120,36 +124,46 @@ function renderExport(){
   let rowsHtml='';
   ROWS.forEach(r=>{
     const sel=radio('row'+r[0]);
+    /* nhãn mặc định Đạt/Chưa đạt đã có ở tiêu đề cột → chỉ hiện ô tick;
+       dòng có nhãn riêng (vd "Có"/"Không") thì in nhãn nhỏ dưới ô tick */
+    const isDefault = r[3]==='Đạt' && r[4]==='Chưa đạt';
+    const okCell  = isDefault ? cb(sel==='ok')  : `${cb(sel==='ok')}<div class="rl">${r[3]}</div>`;
+    const badCell = isDefault ? cb(sel==='bad') : `${cb(sel==='bad')}<div class="rl">${r[4]}</div>`;
     rowsHtml+=`<tr><td class="stt">${r[0]}</td><td class="main">${r[1]}</td><td>${r[2]}</td>`+
-      `<td class="res"><span class="rh k">${r[3]}</span>${cb(sel==='ok')}</td>`+
-      `<td class="res"><span class="rh x">${r[4]}</span>${cb(sel==='bad')}</td></tr>`;
+      `<td class="res">${okCell}</td><td class="res">${badCell}</td></tr>`;
   });
   const kl=radio('ketluan');
+  const mota=esc(val('f_mota'));
   document.getElementById('sheet').innerHTML=
-    (LOGO_URL?`<img class="elogo" src="${LOGO_URL}">`:'')+
+    `<div class="ehead">`+
+      `<div class="elogo-wrap">${LOGO_URL?`<img class="elogo" src="${LOGO_URL}">`:''}</div>`+
+      `${CONF_URL?`<img class="econf-img" src="${CONF_URL}">`:`<div class="econf">CONFIDENTIAL</div>`}`+
+    `</div>`+
     `<h1>CHECKLIST NGHIỆM THU SAU SỬA CHỮA</h1>`+
     `<div class="ssub">(Trụ sạc và Tủ đổi Pin)</div>`+
     `<div class="esec">I. THÔNG TIN</div>`+
-    `<div class="eline"><b>Mã trụ / trạm:</b>${vline(val('f_ma_tru'))}<b>Mã sự vụ:</b>${vline(val('f_ma_su_vu'))}</div>`+
-    `<div class="eline"><b>Địa điểm:</b>${vline(val('f_dia_diem'))}</div>`+
-    `<div class="eline"><b>Ngày sửa chữa:</b>${vline(val('f_ngay'))}<b>KTV thực hiện:</b>${vline(val('f_ktv'))}<b>NCC/ĐTUQ:</b>${vline(val('f_ncc'))}</div>`+
-    `<div class="eline"><b>Hình thức sửa chữa:</b>`+
-      `${cb(ht==='Có thay linh kiện')}Có thay linh kiện&nbsp;&nbsp;`+
-      `${cb(ht==='Không thay')}Không thay&nbsp;&nbsp;`+
-      `${cb(ht==='Không sửa chữa')}Không sửa chữa</div>`+
+    `<ul class="einfo">`+
+      `<li><b>Mã trụ / trạm:</b>${vline(val('f_ma_tru'))}<b>Mã sự vụ:</b>${vline(val('f_ma_su_vu'))}</li>`+
+      `<li><b>Địa điểm:</b>${vline(val('f_dia_diem'),'wide')}</li>`+
+      `<li><b>Ngày sửa chữa:</b>${vline(val('f_ngay'))}</li>`+
+      `<li><b>KTV thực hiện:</b>${vline(val('f_ktv'))}<b>NCC/ĐTUQ:</b>${vline(val('f_ncc'))}</li>`+
+      `<li><b>Hình thức sửa chữa:</b> `+
+        `${cb(ht==='Có thay linh kiện')}Có thay linh kiện&nbsp;&nbsp;`+
+        `${cb(ht==='Không thay')}Không thay&nbsp;&nbsp;`+
+        `${cb(ht==='Không sửa chữa')}Không sửa chữa</li>`+
+    `</ul>`+
     `<div class="esec">II. KIỂM TRA KỸ THUẬT – NGHIỆM THU</div>`+
-    `<table><thead><tr><th>STT</th><th>Hạng mục chính</th><th>Hạng mục nhỏ</th><th>Đạt</th><th>Chưa đạt</th></tr></thead>`+
+    `<table><thead><tr><th class="hstt">STT</th><th>Hạng mục chính</th><th>Hạng mục nhỏ</th><th class="hres">Đạt</th><th class="hres">Chưa đạt</th></tr></thead>`+
     `<tbody>${rowsHtml}</tbody></table>`+
-    `<div class="eline" style="margin-top:10px"><b>Mô tả khác:</b></div>`+
-    `<div class="enote">${esc(val('f_mota'))}</div>`+
+    `<div class="elabel"><b>Mô tả khác:</b></div>`+
+    `<div class="emota">${mota}</div>`+
     `<div class="esec">III. KẾT LUẬN &amp; XÁC NHẬN</div>`+
-    `<div class="eline"><b>Kết luận nghiệm thu:</b>${cb(kl==='dat')}Đạt&nbsp;&nbsp;${cb(kl==='khong')}Không đạt`+
-      `&nbsp;&nbsp;<b>Lý do:</b>${vline(val('f_lydo'))}</div>`+
-    `<div class="eline"><b>KTV sửa chữa:</b>${vline(val('f_ktv_ky'))}<b>Ký:</b>${kyCell('ktv')}</div>`+
-    `<div class="eline"><b>Giám sát / nghiệm thu (nếu có):</b>${vline(val('f_gs'))}<b>Ký:</b>${kyCell('gs')}</div>`+
-    `<div class="efoot"><b>Lưu ý:</b> Tải đầy đủ hình ảnh lên hệ thống VOMS kèm tọa độ và thời gian: `+
-      `tổng thể trụ/trạm trước &amp; sau sửa chữa, màn hình lỗi trước &amp; sau (nếu có), linh kiện cũ và mới `+
-      `(rõ SN nếu có), vị trí đã sửa hoàn thiện, ảnh/video test sạc-đổi pin (nếu có), và ảnh checklist này.</div>`;
+    `<ul class="einfo">`+
+      `<li><b>Kết luận nghiệm thu:</b></li>`+
+      `<li class="sub">${cb(kl==='dat')}Đạt&nbsp;&nbsp;&nbsp;${cb(kl==='khong')}Không đạt&nbsp;(Lý do:${vline(val('f_lydo'),'wide')})</li>`+
+      `<li><b>KTV sửa chữa:</b>${vline(val('f_ktv_ky'))}<b>Ký:</b>${kyCell('ktv')}</li>`+
+      `<li><b>Giám sát / nghiệm thu (nếu có):</b>${vline(val('f_gs'))}<b>Ký:</b>${kyCell('gs')}</li>`+
+    `</ul>`;
 }
 
 function fileName(ext){
